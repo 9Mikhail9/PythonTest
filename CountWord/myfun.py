@@ -9,6 +9,12 @@ REPORT = "/Report.xlsx"
 REPORTNUM = 0
 symbols_list = ["\n","Unnamed:","NaN",",",".","?","!","(",")",";",":"," ’","’ ","'","‘ "," ‘","— "," —","1","2","3","4","5","6","7","8","9","0",'"',"\\","/"]
 
+def open_catalogname(catalogname):
+    if os.path.exists(catalogname.replace("\\", "/")):
+        return True
+    else:
+        return False
+
 def read_txt(filename):
     with open(filename, "r") as file:
         text = file.read()
@@ -96,10 +102,15 @@ def opening_file(filename, catalogname):
 def create_files_tatus_table(data_file, filename, status, mylist):
     if status:
         new_row = pd.DataFrame([[filename, 'Read']], columns=['File Name', 'Read/Not Read'])
-        mylist.insert(END, filename + ":           Read")
+        status = filename + ":           Read"
     else:
         new_row = pd.DataFrame([[filename, 'Not Read']], columns=['File Name', 'Read/Not Read'])
-        mylist.insert(END, filename + ":           Not Read")
+        status = filename + ":           Not Read"
+    if len(status) >= 55:
+        status = status[:5] + "..." + status[len(status) - 47:]
+        mylist.insert(END, status)
+    else:
+        mylist.insert(END, status)
     data_file = pd.concat([data_file, new_row], ignore_index=True)
     return data_file
 
@@ -112,7 +123,7 @@ def create_word_quantity_table(data_word, word, quantity):
 
 def saving_report(data_word, data_file, catalogname):
     global REPORT, REPORTNUM
-    if os.path.exists(catalogname.replace("\ ", "/").replace(" ", "") + "\Report Catalog"):
+    if os.path.exists(catalogname.replace("\\", "/") + "\Report Catalog"):
         if not os.path.exists(catalogname + "\Report Catalog" + "\\" + REPORT):
             writer = pd.ExcelWriter(catalogname + "\Report Catalog" + "\\" + REPORT, engine='xlsxwriter')
             data_file.to_excel(writer, 'Sheet1', index_label=False, index=False, header=True)
